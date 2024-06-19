@@ -9,38 +9,53 @@ import SwiftUI
 
 struct SplashView: View {
 
-    @State var state: SplashUIState = .loading
+    @ObservedObject var viewModel: SplashViewModel
 
     var body: some View {
-        switch state {
-        case .loading:
-            loadingView()
-        case .goToSignInScreen:
-            Text("Carregar Login")
-        case .goToHomeScreen:
-            Text("Carregar Home")
-        case .error(let mensage):
-            Text("Erro: \(mensage)")
-        }
+        Group {
+            switch viewModel.uiState {
+            case .loading:
+                loadingView()
+            case .goToSignInScreen:
+                Text("Carregar Login")
+            case .goToHomeScreen:
+                Text("Carregar Home")
+            case .error(let message):
+                loadingView(error: message)
+            }
+        }.onAppear(perform: viewModel.onAppear)
     }
 }
 
 extension SplashView {
-    func loadingView() -> some View {
+    func loadingView(error: String? =  nil) -> some View {
         ZStack {
-            Image("logo")
+            Image("logo2")
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(20)
                 .background(Color.gray)
                 .ignoresSafeArea()
+
+            if let error = error {
+                Text("")
+                    .alert(isPresented: .constant(true)) {
+                        Alert(
+                            title: Text("Habitualize"),
+                            message: Text(error),
+                            dismissButton: .default(Text("Ok")) {
+                                // fazer algo quando some o alerta, tipo tentar novamente
+                        })
+                    }
+            }
         }
     }
 }
 
 struct SplashView_Preview: PreviewProvider {
     static var previews: some View {
-        SplashView()
+        let viewModel = SplashViewModel()
+        SplashView(viewModel: viewModel)
     }
 }
